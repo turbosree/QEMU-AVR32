@@ -2334,6 +2334,29 @@ void cpu_loop (CPUState *env)
 }
 #endif
 
+#ifdef TARGET_AVR32
+void cpu_loop (CPUState *env)
+{
+    int trapnr, ret;
+    target_siginfo_t info;
+    /* SN: TBD - Just to avoid compiler warning*/
+    (void)ret;
+    (void)info;
+    while (1) {
+        trapnr = cpu_avr32_exec (env);
+
+        switch (trapnr) {
+
+        default:
+            printf ("Unhandled trap: 0x%x\n", trapnr);
+            cpu_dump_state(env, stderr, fprintf, 0);
+            exit (1);
+        }
+        process_pending_signals (env);
+    }
+}
+#endif
+
 #ifdef TARGET_CRIS
 void cpu_loop (CPUState *env)
 {
@@ -3794,6 +3817,14 @@ int main(int argc, char **argv, char **envp)
             }
             env->psw.mask = regs->psw.mask;
             env->psw.addr = regs->psw.addr;
+    }
+#elif defined(TARGET_AVR32)
+    {
+        int i;
+        sr_write(env, regs->uregs[16], 0xffffffff);
+        for(i = 0; i < 16; i++) {
+            env->gregs[i] = regs->uregs[i];
+        }
     }
 #else
 #error unsupported target CPU

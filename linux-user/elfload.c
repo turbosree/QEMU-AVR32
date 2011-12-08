@@ -382,6 +382,106 @@ bool guest_validate_base(unsigned long guest_base)
 
 #endif
 
+#ifdef TARGET_AVR32
+
+#define ELF_START_MMAP 0x80000000
+
+#define elf_check_arch(x) ( (x) == EM_AVR32 )
+
+#define ELF_CLASS       ELFCLASS32
+#define ELF_ARCH        EM_AVR32
+
+static inline void init_thread(struct target_pt_regs *regs,
+                               struct image_info *infop)
+{
+    /* abi_long stack = infop->start_stack; */
+    memset(regs, 0, sizeof(*regs));
+    regs->AVR32_sr = 0x10;      /* SN: TBD - Review */
+    if (infop->entry & 1)
+       {
+          /* SN: TBD - Review */
+       }
+    regs->AVR32_pc = infop->entry & 0xfffffffe;
+    regs->AVR32_sp = infop->start_stack;
+    /* SN: TBD */
+}
+
+#define ELF_NREG    18
+typedef target_elf_greg_t  target_elf_gregset_t[ELF_NREG];
+
+static void elf_core_copy_regs(target_elf_gregset_t *regs, const CPUState *env)
+{
+    (*regs)[0] = tswapl(env->gregs[0]);
+    (*regs)[1] = tswapl(env->gregs[1]);
+    (*regs)[2] = tswapl(env->gregs[2]);
+    (*regs)[3] = tswapl(env->gregs[3]);
+    (*regs)[4] = tswapl(env->gregs[4]);
+    (*regs)[5] = tswapl(env->gregs[5]);
+    (*regs)[6] = tswapl(env->gregs[6]);
+    (*regs)[7] = tswapl(env->gregs[7]);
+    (*regs)[8] = tswapl(env->gregs[8]);
+    (*regs)[9] = tswapl(env->gregs[9]);
+    (*regs)[10] = tswapl(env->gregs[10]);
+    (*regs)[11] = tswapl(env->gregs[11]);
+    (*regs)[12] = tswapl(env->gregs[12]);
+    (*regs)[13] = tswapl(env->gregs[13]);
+    (*regs)[14] = tswapl(env->gregs[14]);
+    (*regs)[15] = tswapl(env->gregs[15]);
+
+    (*regs)[16] = tswapl(sr_read((CPUState *)env));
+    (*regs)[17] = tswapl(env->gregs[0]); /* XXX */
+}
+
+#define USE_ELF_CORE_DUMP
+#define ELF_EXEC_PAGESIZE       4096
+
+#define TARGET_HAS_GUEST_VALIDATE_BASE
+/* We want the opportunity to check the suggested base */
+bool guest_validate_base(unsigned long guest_base)
+{
+    unsigned long real_start, test_page_addr;
+
+    /* We need to check that we can force a fault on access to the
+     * commpage at 0xffff0fxx
+     */
+    test_page_addr = guest_base + (0xffff0f00 & qemu_host_page_mask);
+    /* Note it needs to be writeable to let us initialise it */
+    real_start = (unsigned long)
+                 mmap((void *)test_page_addr, qemu_host_page_size,
+                     PROT_READ | PROT_WRITE,
+                     MAP_ANONYMOUS | MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
+
+    /* If we can't map it then try another address */
+    if (real_start == -1ul) {
+        return 0;
+    }
+
+    if (real_start != test_page_addr) {
+        /* OS didn't put the page where we asked - unmap and reject */
+        munmap((void *)real_start, qemu_host_page_size);
+        return 0;
+    }
+
+    /* Leave the page mapped
+     * Populate it (mmap should have left it all 0'd)
+     */
+
+    /* Kernel helper versions */
+    __put_user(5, (uint32_t *)g2h(0xffff0ffcul));
+
+    /* Now it's populated make it RO */
+    if (mprotect((void *)test_page_addr, qemu_host_page_size, PROT_READ)) {
+        perror("Protecting guest commpage");
+        exit(-1);
+    }
+
+    return 1; /* All good */
+}
+
+#define ELF_HWCAP 0             /* SN: TBD - Review */
+
+#endif
+
 #ifdef TARGET_UNICORE32
 
 #define ELF_START_MMAP          0x80000000

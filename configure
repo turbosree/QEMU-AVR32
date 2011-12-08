@@ -3322,7 +3322,7 @@ mkdir -p $target_dir/fpu
 mkdir -p $target_dir/tcg
 mkdir -p $target_dir/ide
 mkdir -p $target_dir/9pfs
-if test "$target" = "arm-linux-user" -o "$target" = "armeb-linux-user" -o "$target" = "arm-bsd-user" -o "$target" = "armeb-bsd-user" ; then
+if test "$target" = "arm-linux-user" -o "$target" = "armeb-linux-user" -o "$target" = "arm-bsd-user" -o "$target" = "armeb-bsd-user" -o "$target" = "avr32-linux-user"; then
   mkdir -p $target_dir/nwfpe
 fi
 symlink $source_path/Makefile.target $target_dir/Makefile
@@ -3472,6 +3472,14 @@ case "$target_arch2" in
   xtensa|xtensaeb)
     TARGET_ARCH=xtensa
     target_phys_bits=32
+  ;;
+  avr32)
+    TARGET_ARCH=avr32
+    # bflt="yes"
+    # target_nptl="yes"
+    gdb_xml_files="avr32-core.xml"
+    target_phys_bits=32
+    # target_llong_alignment=4
   ;;
   *)
     echo "Unsupported target CPU"

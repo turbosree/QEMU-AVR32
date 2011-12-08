@@ -59,7 +59,8 @@
 
 #if defined(TARGET_I386) || defined(TARGET_ARM) || defined(TARGET_SH4) \
     || defined(TARGET_M68K) || defined(TARGET_CRIS) || defined(TARGET_UNICORE32) \
-    || defined(TARGET_S390X)
+    || defined(TARGET_S390X) \
+    || defined(TARGET_AVR32)
 
 #define TARGET_IOC_SIZEBITS	14
 #define TARGET_IOC_DIRBITS	2
@@ -323,7 +324,7 @@ int do_sigaction(int sig, const struct target_sigaction *act,
     || defined(TARGET_PPC) || defined(TARGET_MIPS) || defined(TARGET_SH4) \
     || defined(TARGET_M68K) || defined(TARGET_ALPHA) || defined(TARGET_CRIS) \
     || defined(TARGET_MICROBLAZE) || defined(TARGET_UNICORE32) \
-    || defined(TARGET_S390X)
+    || defined(TARGET_S390X) || defined(TARGET_AVR32)
 
 #if defined(TARGET_SPARC)
 #define TARGET_SA_NOCLDSTOP    8u
@@ -1066,7 +1067,8 @@ struct target_winsize {
 #endif
 
 #if (defined(TARGET_I386) && defined(TARGET_ABI32)) || defined(TARGET_ARM) \
-    || defined(TARGET_CRIS) || defined(TARGET_UNICORE32)
+    || defined(TARGET_CRIS) || defined(TARGET_UNICORE32) \
+    || defined(TARGET_AVR32)
 struct target_stat {
 	unsigned short st_dev;
 	unsigned short __pad1;
@@ -1763,6 +1765,36 @@ struct target_stat {
     abi_long       st_blocks;
     abi_ulong  __unused[3];
 };
+#elif defined(TARGET_AVR32)
+struct target_stat64 {
+        unsigned long long st_dev;
+        unsigned int    __pad1;
+        abi_ulong    __st_ino;
+        unsigned int    st_mode;
+        unsigned int    st_nlink;
+
+        abi_ulong    st_uid;
+        abi_ulong    st_gid;
+
+        unsigned long long st_rdev;
+        unsigned int    __pad2[2];
+
+        long long       st_size;
+        abi_ulong    st_blksize;
+        unsigned int    __pad3;
+        unsigned long long st_blocks;
+
+        abi_ulong    target_st_atime;
+        abi_ulong    target_st_atime_nsec;
+
+        abi_ulong    target_st_mtime;
+        abi_ulong    target_st_mtime_nsec;
+
+        abi_ulong    target_st_ctime;
+        abi_ulong    target_st_ctime_nsec;
+
+        unsigned long long st_ino;
+} QEMU_PACKED;
 #else
 #error unsupported CPU
 #endif
