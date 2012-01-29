@@ -25,8 +25,38 @@ void sr_write(CPUAVR32State *env, uint32_t val, uint32_t mask)
 CPUAVR32State *cpu_avr32_init(const char *cpu_model)
 {
    /* SN: TBD */
-   CPUAVR32State *env = NULL;
+   CPUAVR32State *env;
+   static int inited = 0;
+
+   env = g_malloc0(sizeof(CPUAVR32State));
+   cpu_exec_init(env);
+   if (!inited) {
+      inited = 1;
+      avr32_translate_init();
+   }
+   cpu_reset(env);
+   qemu_init_vcpu(env);
+
    return env;
+}
+
+void cpu_reset(CPUAVR32State *env)
+{
+   if (qemu_loglevel_mask(CPU_LOG_RESET)) {
+      qemu_log("CPU Reset\n");
+      log_cpu_state(env, 0);
+   }
+
+   memset(env, 0, offsetof(CPUAVR32State, breakpoints));
+
+#if defined (CONFIG_USER_ONLY)
+   env->sreg.sr = AVR32_SR_M_MASK & (AVR32_SR_M_APP << AVR32_SR_M_OFFSET);
+   /* SN: TBD - Should we enable interrupts??  */
+#else
+   /* Supervisor mode with interrupts disabled.  */
+   env->sreg.sr = (AVR32_SR_M_MASK & (AVR32_SR_M_SUP << AVR32_SR_M_OFFSET)) | AVR32_SR_GM_MASK | AVR32_SR_EM_MASK;
+#endif
+   tlb_flush(env, 1);
 }
 
 void avr32_cpu_list(FILE *f, fprintf_function cpu_fprintf)

@@ -87,7 +87,7 @@ typedef int64_t  Elf64_Sxword;
 #define EM_PPC64       21       /* PowerPC64 */
 
 #define EM_ARM		40		/* ARM */
-#define EM_AVR32	41		/* AVR32 */
+/* #define EM_AVR32	41		/\* AVR32 *\/ */
 
 #define EM_SH	       42	/* SuperH */
 

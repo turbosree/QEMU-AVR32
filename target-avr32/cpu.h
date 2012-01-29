@@ -19,6 +19,8 @@
 #ifndef CPU_AVR32_H
 #define CPU_AVR32_H
 
+#define TARGET_WORDS_BIGENDIAN
+
 #define TARGET_LONG_BITS 32
 #define ELF_MACHINE	EM_AVR32
 #define CPUState struct CPUAVR32State
@@ -30,10 +32,43 @@
 #include "qemu-common.h"
 #include "cpu-defs.h"
 #include "softfloat.h"
+#include "core_c3_100.h"
+
+typedef union avr32_sreg_t {
+   struct
+   {
+      uint32_t                 : 2;
+      uint32_t h               : 1;
+      uint32_t j               : 1;
+      uint32_t dm              : 1;
+      uint32_t d               : 1;
+      uint32_t                 : 1;
+      uint32_t m2              : 1;
+      uint32_t m1              : 1;
+      uint32_t m0              : 1;
+      uint32_t em              : 1;
+      uint32_t i3m             : 1;
+      uint32_t i2m             : 1;
+      uint32_t i1m             : 1;
+      uint32_t i0m             : 1;
+      uint32_t gm              : 1;
+      uint32_t r               : 1;
+      uint32_t t               : 1;
+      uint32_t                 : 8;
+      uint32_t l               : 1;
+      uint32_t q               : 1;
+      uint32_t v               : 1;
+      uint32_t n               : 1;
+      uint32_t z               : 1;
+      uint32_t c               : 1;
+   }bits;
+   uint32_t sr;
+} avr32_sreg_t;
 
 typedef struct CPUAVR32State {
-   /* Up to 15 general-purpose 32-bit registers and SR*/
+   /* Up to 15 general-purpose 32-bit registers, PC and SR*/
    uint32_t gregs[16];
+   avr32_sreg_t sreg;
    CPU_COMMON
 } CPUAVR32State;
 

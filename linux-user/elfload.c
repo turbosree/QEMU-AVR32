@@ -384,6 +384,10 @@ bool guest_validate_base(unsigned long guest_base)
 
 #ifdef TARGET_AVR32
 
+#ifndef EM_AVR32
+#define EM_AVR32  0x18ad
+#endif
+
 #define ELF_START_MMAP 0x80000000
 
 #define elf_check_arch(x) ( (x) == EM_AVR32 )
@@ -1152,24 +1156,78 @@ static void load_symbols(struct elfhdr *hdr, int fd, abi_ulong load_bias);
    This can be performed before bswapping the entire header.  */
 static bool elf_check_ident(struct elfhdr *ehdr)
 {
-    return (ehdr->e_ident[EI_MAG0] == ELFMAG0
-            && ehdr->e_ident[EI_MAG1] == ELFMAG1
-            && ehdr->e_ident[EI_MAG2] == ELFMAG2
-            && ehdr->e_ident[EI_MAG3] == ELFMAG3
-            && ehdr->e_ident[EI_CLASS] == ELF_CLASS
-            && ehdr->e_ident[EI_DATA] == ELF_DATA
-            && ehdr->e_ident[EI_VERSION] == EV_CURRENT);
+   bool ret = true;
+   if(ehdr->e_ident[EI_MAG0] != ELFMAG0)
+      {
+         ret = false;
+      }
+   if(ehdr->e_ident[EI_MAG1] != ELFMAG1)
+      {
+         ret = false;
+      }
+   if(ehdr->e_ident[EI_MAG2] != ELFMAG2)
+      {
+         ret = false;
+      }
+   if(ehdr->e_ident[EI_MAG3] != ELFMAG3)
+      {
+         ret = false;
+      }
+   if(ehdr->e_ident[EI_CLASS] != ELF_CLASS)
+      {
+         ret = false;
+      }
+   if(ehdr->e_ident[EI_DATA] != ELF_DATA)
+      {
+         ret = false;
+      }
+   if(ehdr->e_ident[EI_VERSION] != EV_CURRENT)
+      {
+         ret = false;
+      }
+   return ret;
+   /* SN: TBD - Revert to initial implementation */
+   /* return (ehdr->e_ident[EI_MAG0] == ELFMAG0 */
+   /*         && ehdr->e_ident[EI_MAG1] == ELFMAG1 */
+   /*         && ehdr->e_ident[EI_MAG2] == ELFMAG2 */
+   /*         && ehdr->e_ident[EI_MAG3] == ELFMAG3 */
+   /*         && ehdr->e_ident[EI_CLASS] == ELF_CLASS */
+   /*         && ehdr->e_ident[EI_DATA] == ELF_DATA */
+   /*         && ehdr->e_ident[EI_VERSION] == EV_CURRENT); */
 }
 
 /* Verify the portions of EHDR outside of E_IDENT for the target.
    This has to wait until after bswapping the header.  */
 static bool elf_check_ehdr(struct elfhdr *ehdr)
 {
-    return (elf_check_arch(ehdr->e_machine)
-            && ehdr->e_ehsize == sizeof(struct elfhdr)
-            && ehdr->e_phentsize == sizeof(struct elf_phdr)
-            && ehdr->e_shentsize == sizeof(struct elf_shdr)
-            && (ehdr->e_type == ET_EXEC || ehdr->e_type == ET_DYN));
+   bool ret = true;
+   if(!elf_check_arch(ehdr->e_machine))
+      {
+         ret = false;
+      }
+   if(ehdr->e_ehsize != sizeof(struct elfhdr))
+      {
+         ret = false;
+      }
+   if(ehdr->e_phentsize != sizeof(struct elf_phdr))
+      {
+         ret = false;
+      }
+   if(ehdr->e_shentsize != sizeof(struct elf_shdr))
+      {
+         ret = false;
+      }
+   if(!(ehdr->e_type == ET_EXEC || ehdr->e_type == ET_DYN))
+      {
+         ret = false;
+      }
+   return ret;
+   /* SN: TBD - Revert to initial implementation */
+   /* return (elf_check_arch(ehdr->e_machine) */
+   /*         && ehdr->e_ehsize == sizeof(struct elfhdr) */
+   /*         && ehdr->e_phentsize == sizeof(struct elf_phdr) */
+   /*         && ehdr->e_shentsize == sizeof(struct elf_shdr) */
+   /*         && (ehdr->e_type == ET_EXEC || ehdr->e_type == ET_DYN)); */
 }
 
 /*

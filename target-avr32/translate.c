@@ -52,12 +52,13 @@ typedef struct DisasContext {
 
 static TCGv_ptr cpu_env;
 static TCGv_i32 cpu_gregs[16];
+static TCGv_i32 cpu_sr;
 
 #include "gen-icount.h"
 
 static const char *regnames[] =
    { "r0", "r1", "r2", "r3", "r4", "r5", "r6", "r7",
-     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "pc" };
+     "r8", "r9", "r10", "r11", "r12", "r13", "r14", "pc", "sr" };
 
 /* initialize TCG globals.  */
 void avr32_translate_init(void)
@@ -71,7 +72,9 @@ void avr32_translate_init(void)
                                             offsetof(CPUState, gregs[i]),
                                             regnames[i]);
    }
-
+   cpu_sr = tcg_global_mem_new_i32(TCG_AREG0,
+                                         offsetof(CPUState, sreg),
+                                         regnames[i]);
    /* SN: TBD */
 
 #define GEN_HELPER 2
