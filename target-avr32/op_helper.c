@@ -38,6 +38,12 @@
 #define SHIFT 3
 #include "softmmu_template.h"
 
+static void raise_exception(int tt)
+{
+    env->exception_index = tt;
+    cpu_loop_exit(env);
+}
+
 /* try to fill the TLB and return an exception if error. If retaddr is
    NULL, it means that the function was called in C code (i.e. not
    from generated code or from helper.c) */
@@ -67,13 +73,5 @@ void tlb_fill(CPUState *env1, target_ulong addr, int is_write, int mmu_idx,
         raise_exception(env->exception_index);
     }
     env = saved_env;
-}
-#endif
-
-#if !defined(CONFIG_USER_ONLY)
-static void raise_exception(int tt)
-{
-    env->exception_index = tt;
-    cpu_loop_exit(env);
 }
 #endif

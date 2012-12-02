@@ -97,6 +97,14 @@ int cpu_avr32_handle_mmu_fault (CPUState *env, target_ulong address,
    return 1;
 }
 
+static inline int get_phys_addr(CPUState *env, uint32_t address,
+                                int access_type, int is_user,
+                                uint32_t *phys_ptr, int *prot,
+                                target_ulong *page_size)
+{
+   return 0;
+}
+
 target_phys_addr_t cpu_get_phys_page_debug(CPUState *env, target_ulong addr)
 {
    uint32_t phys_addr;

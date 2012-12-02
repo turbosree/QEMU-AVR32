@@ -58,6 +58,8 @@ const char arch_config_name[] = CONFIG_QEMU_CONFDIR "/target-" TARGET_ARCH ".con
 #define QEMU_ARCH QEMU_ARCH_ALPHA
 #elif defined(TARGET_ARM)
 #define QEMU_ARCH QEMU_ARCH_ARM
+#elif defined(TARGET_AVR32)
+#define QEMU_ARCH QEMU_ARCH_AVR32
 #elif defined(TARGET_CRIS)
 #define QEMU_ARCH QEMU_ARCH_CRIS
 #elif defined(TARGET_I386)

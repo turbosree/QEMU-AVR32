@@ -65,6 +65,9 @@ typedef union avr32_sreg_t {
    uint32_t sr;
 } avr32_sreg_t;
 
+/* SN: TBD - Correct it for AVR32 */
+#define NB_MMU_MODES 2
+
 typedef struct CPUAVR32State {
    /* Up to 15 general-purpose 32-bit registers, PC and SR*/
    uint32_t gregs[16];
